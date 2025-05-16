@@ -1,0 +1,23 @@
+
+-- 🔍 Top Seller per Category: Products with the most units sold
+ with revenue_table  as(
+ select 
+	 p.product_id
+	 ,p.product_price
+	 ,pg.category
+	 ,sum(op.item_quantity) as revenue
+ from products p 
+	 left join product_groups pg on pg.group_id = p.group_id
+	 left join order_positions op on op.product_id = p.product_id
+	 group by 1,2,3),
+	 ranked_table as 
+ (select *
+ ,row_number() over (partition by category order by revenue desc) as ranked
+ from revenue_table ) 
+ select *,
+ case 
+ 	when ranked = 1 then 'best'
+ 	else 'other'
+ end as customer_type
+ from ranked_table
+
